@@ -8,8 +8,6 @@ module impjavafx {
     opens com.praktikumjavafx.musicplayer to javafx.fxml;
     exports com.praktikumjavafx.musicplayer;
 
-    // Package tugas/praktikum Anda yang lain
-    exports com.praktikumjavafx.stageandscene;
-    exports com.praktikumjavafx.layoutdandatabase;
-    opens com.praktikumjavafx.layoutdandatabase to javafx.fxml;
+    exports com.praktikumjavafx;
+    opens com.praktikumjavafx to javafx.fxml;
 }
