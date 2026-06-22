@@ -1,5 +1,4 @@
 package com.praktikumjavafx.musicplayer;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,7 +10,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +31,10 @@ public class MusicController {
     public void initialize() {
         playlist = new ArrayList<>();
         
-        playlist.add(new Song("Daniel Caesar", "We Find Love", "C:/Users/Hasbi Juadi/Downloads/Daniel Caesar - We Find Love.mp3"));
-        playlist.add(new Song("Raissa Anggiani", "Losing Us", "C:/Users/Hasbi Juadi/Downloads/Raissa Anggiani - Losing Us.mp3"));
-        playlist.add(new Song("Sienna Spiro", "The Visitor", "C:/Users/Hasbi Juadi/Downloads/SIENNA SPIRO - The Visitor.mp3"));
-        playlist.add(new Song("Rafi Sudirman", "Fell in Love (Again)", "C:/Users/Hasbi Juadi/Downloads/Rafi Sudirman - Fell in Love (Again).mp3"));
+        playlist.add(new Song("Daniel Caesar", "We Find Love", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerDaniel Caesar - We Find Love.mp3"));
+        playlist.add(new Song("Raissa Anggiani", "Losing Us", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerRaissa Anggiani - Losing Us.mp3"));
+        playlist.add(new Song("Sienna Spiro", "The Visitor", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerSIENNA SPIRO - The Visitor.mp3"));
+        playlist.add(new Song("Rafi Sudirman", "Fell in Love (Again)", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerRafi Sudirman - Fell in Love (Again).mp3"));
 
         observablePlaylist = FXCollections.observableList(playlist);
         songListView.setItems(observablePlaylist);
@@ -127,7 +125,7 @@ public class MusicController {
     private void handleNext() {
         if (playlist.isEmpty()) return;
 
-        if (currentSongIndex < playlist.size() - 1) {
+        if (currentSongIndex > playlist.size() - 1) {
             currentSongIndex++;
         } else {
             currentSongIndex = 0; 
