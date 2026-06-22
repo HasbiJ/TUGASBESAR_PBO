@@ -1,4 +1,5 @@
 package com.praktikumjavafx.musicplayer;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,6 +12,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +33,14 @@ public class MusicController {
     public void initialize() {
         playlist = new ArrayList<>();
         
-        playlist.add(new Song("Daniel Caesar", "We Find Love", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerDaniel Caesar - We Find Love.mp3"));
-        playlist.add(new Song("Raissa Anggiani", "Losing Us", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerRaissa Anggiani - Losing Us.mp3"));
-        playlist.add(new Song("Sienna Spiro", "The Visitor", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerSIENNA SPIRO - The Visitor.mp3"));
-        playlist.add(new Song("Rafi Sudirman", "Fell in Love (Again)", "C:\\Users\\Hasbi Juadi\\Documents\\GitHub\\TUGASBESAR_PBO\\PraktikumJavafx\\impjavafx\\src\\main\\resources\\com\\praktikumjavafx\\musicplayerRafi Sudirman - Fell in Love (Again).mp3"));
+        // Menggunakan path relatif dari folder resources
+        String pathPrefix = "/com/praktikumjavafx/musicplayer/";
+
+        // Menambahkan lagu dengan URL resource
+        addSongToPlaylist("Daniel Caesar", "We Find Love", pathPrefix + "Daniel Caesar - We Find Love.mp3");
+        addSongToPlaylist("Raissa Anggiani", "Losing Us", pathPrefix + "Raissa Anggiani - Losing Us.mp3");
+        addSongToPlaylist("Sienna Spiro", "The Visitor", pathPrefix + "SIENNA SPIRO - The Visitor.mp3");
+        addSongToPlaylist("Rafi Sudirman", "Fell in Love (Again)", pathPrefix + "Rafi Sudirman - Fell in Love (Again).mp3");
 
         observablePlaylist = FXCollections.observableList(playlist);
         songListView.setItems(observablePlaylist);
@@ -43,9 +49,6 @@ public class MusicController {
             if (newValue != null) {
                 currentSongIndex = playlist.indexOf(newValue);
                 loadSong(currentSongIndex);
-                if (isPlaying) {
-                    playMedia();
-                }
             }
         });
 
@@ -58,8 +61,15 @@ public class MusicController {
         if (!playlist.isEmpty()) {
             loadSong(currentSongIndex);
         }
+    }
 
-        songListView.refresh();
+    private void addSongToPlaylist(String artist, String title, String resourcePath) {
+        URL url = getClass().getResource(resourcePath);
+        if (url != null) {
+            playlist.add(new Song(artist, title, url.toExternalForm()));
+        } else {
+            System.err.println("File tidak ditemukan: " + resourcePath);
+        }
     }
 
     private void loadSong(int index) {
@@ -73,15 +83,8 @@ public class MusicController {
         songListView.getSelectionModel().select(index);
 
         try {
-            File file = new File(currentSong.getFilePath());
-            
-            if (!file.exists()) {
-                currentTrackLabel.setText("File tidak ditemukan: " + currentSong.getTitle());
-                return;
-            }
-
-            String mediaUri = file.toURI().toString(); 
-            Media media = new Media(mediaUri);
+            // Menggunakan URL string yang sudah di-generate
+            Media media = new Media(currentSong.getFilePath());
             mediaPlayer = new MediaPlayer(media);
             
             mediaPlayer.setVolume(volumeSlider.getValue() / 100);
@@ -91,7 +94,7 @@ public class MusicController {
                 mediaPlayer.play();
             }
         } catch (Exception e) {
-            currentTrackLabel.setText("Error loading file: " + currentSong.getTitle());
+            currentTrackLabel.setText("Error loading: " + currentSong.getTitle());
             e.printStackTrace();
         }
     }
@@ -124,46 +127,25 @@ public class MusicController {
     @FXML
     private void handleNext() {
         if (playlist.isEmpty()) return;
-
-        if (currentSongIndex > playlist.size() - 1) {
-            currentSongIndex++;
-        } else {
-            currentSongIndex = 0; 
-        }
+        currentSongIndex = (currentSongIndex + 1) % playlist.size();
         loadSong(currentSongIndex);
     }
 
     @FXML
     private void handlePrevious() {
         if (playlist.isEmpty()) return;
-
-        if (currentSongIndex > 0) {
-            currentSongIndex--;
-        } else {
-            currentSongIndex = playlist.size() - 1; 
-        }
+        currentSongIndex = (currentSongIndex - 1 + playlist.size()) % playlist.size();
         loadSong(currentSongIndex);
     }
 
     @FXML
     private void handleAddNewSong() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Pilih File Musik MP3");
-        fileChooser.getExtensionFilters().add(
-            new FileChooser.ExtensionFilter("Audio Files (*.mp3)", "*.mp3")
-        );
-
-        Stage stage = (Stage) songListView.getScene().getWindow();
-        File selectedFile = fileChooser.showOpenDialog(stage);
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Audio Files (*.mp3)", "*.mp3"));
+        File selectedFile = fileChooser.showOpenDialog(null);
 
         if (selectedFile != null) {
-            String fullPath = selectedFile.getAbsolutePath();
-            String fileName = selectedFile.getName().replace(".mp3", "");
-            
-            fileName = fileName.replace(" - Local File", "");
-            fileName = fileName.replace("- Local File", "");
-            
-            observablePlaylist.add(new Song("Local File", fileName, fullPath));
+            observablePlaylist.add(new Song("Local File", selectedFile.getName(), selectedFile.toURI().toString()));
         }
     }
 
@@ -171,28 +153,11 @@ public class MusicController {
     private void handleRemoveSong() {
         Song selectedSong = songListView.getSelectionModel().getSelectedItem();
         if (selectedSong != null) {
-            int selectedIndex = playlist.indexOf(selectedSong);
             observablePlaylist.remove(selectedSong);
-            
-            if (playlist.isEmpty()) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.dispose();
-                    mediaPlayer = null;
-                }
-                currentTrackLabel.setText("Now Playing: None");
-                isPlaying = false;
-                playPauseButton.setText("Play");
-            } else {
-                if (currentSongIndex == selectedIndex) {
-                    if (currentSongIndex >= playlist.size()) {
-                        currentSongIndex = playlist.size() - 1;
-                    }
-                    loadSong(currentSongIndex);
-                } else if (currentSongIndex > selectedIndex) {
-                    currentSongIndex--;
-                    songListView.getSelectionModel().select(currentSongIndex);
-                }
+            if (playlist.isEmpty() && mediaPlayer != null) {
+                mediaPlayer.stop();
+                mediaPlayer.dispose();
+                mediaPlayer = null;
             }
         }
     }
